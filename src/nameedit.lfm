@@ -3,6 +3,7 @@ object frmNameEdit: TfrmNameEdit
   Height = 73
   Top = 285
   Width = 512
+  ActiveControl = editName
   Caption = 'frmNameEdit'
   ClientHeight = 73
   ClientWidth = 512
@@ -60,7 +61,7 @@ object frmNameEdit: TfrmNameEdit
     Height = 24
     Top = 48
     Width = 80
-    Caption = 'btnOptions'
+    Caption = 'Options'
     TabOrder = 4
   end
   object btnPrefixCancel: TSpeedButton
