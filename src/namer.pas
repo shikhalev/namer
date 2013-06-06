@@ -7,12 +7,13 @@ unit Namer;
 interface
 
 uses
-  LazarusPackageIntf;
+  NameEdit, LazarusPackageIntf;
 
 implementation
 
 procedure Register;
 begin
+  RegisterUnit( 'NameEdit', @NameEdit.Register);
 end;
 
 initialization

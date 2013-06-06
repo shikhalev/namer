@@ -14,10 +14,12 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
+    <Version Minor="1"/>
     <Files Count="1">
       <Item1>
         <Filename Value="nameedit.pas"/>
-        <UnitName Value="nameedit"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="NameEdit"/>
       </Item1>
     </Files>
     <Type Value="DesignTime"/>
