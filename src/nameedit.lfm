@@ -9,6 +9,7 @@ object frmNameEdit: TfrmNameEdit
   Caption = 'Edit Name'
   ClientHeight = 61
   ClientWidth = 392
+  OnActivate = FormActivate
   OnCreate = FormCreate
   Position = poScreenCenter
   ShowInTaskBar = stNever
@@ -22,6 +23,7 @@ object frmNameEdit: TfrmNameEdit
     CharCase = ecLowerCase
     DragMode = dmAutomatic
     Enabled = False
+    OnKeyPress = editPrefixKeyPress
     TabOrder = 0
     Text = 'cmp'
   end
@@ -30,6 +32,7 @@ object frmNameEdit: TfrmNameEdit
     Height = 22
     Top = 8
     Width = 264
+    OnKeyPress = editNameKeyPress
     TabOrder = 1
     Text = 'editName'
   end
@@ -120,6 +123,7 @@ object frmNameEdit: TfrmNameEdit
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF006360F80AFFFFFF00FFFFFF00FFFFFF00
     }
+    OnClick = btnCancelClick
     TabOrder = 3
   end
   object btnOK: TBitBtn
@@ -164,6 +168,7 @@ object frmNameEdit: TfrmNameEdit
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
     }
+    OnClick = btnOKClick
     TabOrder = 4
   end
   object btnSave: TBitBtn

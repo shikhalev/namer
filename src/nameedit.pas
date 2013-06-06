@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Buttons, ExtCtrls, LazIDEIntf, PropEdits;
+  Buttons, ExtCtrls, LazIDEIntf, PropEdits, LCLType;
 
 type
   TfrmNameEdit = class(TForm)
@@ -22,11 +22,16 @@ type
     editName : TEdit;
     rgScope : TRadioGroup;
     procedure btnAutoClick(Sender : TObject);
+    procedure btnCancelClick(Sender : TObject);
     procedure btnCancelPrefixClick(Sender : TObject);
     procedure btnDeleteClick(Sender : TObject);
     procedure btnEditClick(Sender : TObject);
+    procedure btnOKClick(Sender : TObject);
     procedure btnSaveClick(Sender : TObject);
     procedure cbxClassChange(Sender : TObject);
+    procedure editNameKeyPress(Sender : TObject; var Key : char);
+    procedure editPrefixKeyPress(Sender : TObject; var Key : char);
+    procedure FormActivate(Sender : TObject);
     procedure FormCreate(Sender : TObject);
   private
     fldSysPrefs : TStrings;
@@ -77,6 +82,14 @@ procedure TfrmNameEdit.btnEditClick(Sender : TObject);
  begin
   fillClasses;
   editPrefixMode;
+  editPrefix.Text := classPrefix(cbxClass.Text);
+ end;
+
+procedure TfrmNameEdit.btnOKClick(Sender : TObject);
+ begin
+  ResultName := editPrefix.Text + editName.Text;
+  ResultCaption := editName.Text;
+  self.ModalResult := mrOK;
  end;
 
 procedure TfrmNameEdit.btnSaveClick(Sender : TObject);
@@ -90,6 +103,7 @@ procedure TfrmNameEdit.btnSaveClick(Sender : TObject);
            fldPrjPrefs.Values[cbxClass.Text] := editPrefix.Text;
            fldPrjPrefs.SaveToFile(PrjPrefsFile);
           end;
+  editNameMode;
  end;
 
 procedure TfrmNameEdit.cbxClassChange(Sender : TObject);
@@ -97,9 +111,36 @@ procedure TfrmNameEdit.cbxClassChange(Sender : TObject);
   editPrefix.Text := classPrefix(cbxClass.Text);
  end;
 
+procedure TfrmNameEdit.editNameKeyPress(Sender : TObject; var Key : char);
+ begin
+  if Key = #13
+     then btnOK.Click;
+  if not (UpCase(Key) in ['A'..'Z', '0'..'9', '_', #8, #127])
+     then Key := #0;
+ end;
+
+procedure TfrmNameEdit.editPrefixKeyPress(Sender : TObject; var Key : char);
+ begin
+  if Key = #13
+     then btnSave.Click;
+  if not (UpCase(Key) in ['A'..'Z', '0'..'9', '_', #8, #127])
+     then Key := #0;
+ end;
+
+procedure TfrmNameEdit.FormActivate(Sender : TObject);
+ begin
+  if editName.Visible
+     then editName.SetFocus;
+ end;
+
 procedure TfrmNameEdit.btnAutoClick(Sender : TObject);
  begin
   editPrefix.Text := Generate(cbxClass.Text);
+ end;
+
+procedure TfrmNameEdit.btnCancelClick(Sender : TObject);
+ begin
+  self.ModalResult := mrCancel;
  end;
 
 procedure TfrmNameEdit.btnCancelPrefixClick(Sender : TObject);
@@ -151,6 +192,7 @@ class function TfrmNameEdit.PrjPrefsFile : String;
 procedure TfrmNameEdit.editNameMode;
  begin
   editPrefix.Enabled := false;
+  self.FindPrefix;
   editName.Visible := true;
   btnEdit.Visible := true;
   btnCancel.Visible := true;
