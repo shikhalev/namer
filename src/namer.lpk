@@ -2,6 +2,7 @@
 <CONFIG>
   <Package Version="4">
     <Name Value="Namer"/>
+    <Author Value="Ivan Shikhalev"/>
     <CompilerOptions>
       <Version Value="11"/>
       <SearchPaths>
@@ -14,7 +15,9 @@
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Version Minor="1"/>
+    <Description Value="Component Name propety editor with autoprefixation for Lazarus"/>
+    <License Value="GNU GPL"/>
+    <Version Minor="9"/>
     <Files Count="1">
       <Item1>
         <Filename Value="nameedit.pas"/>
@@ -26,9 +29,11 @@
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="IDEIntf"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item1>
       <Item2>
         <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
