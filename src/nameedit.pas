@@ -10,6 +10,7 @@ uses
 
 type
   TfrmNameEdit = class(TForm)
+    btnAuto : TBitBtn;
     btnDelete : TBitBtn;
     btnEdit : TBitBtn;
     btnCancel : TBitBtn;
@@ -20,7 +21,12 @@ type
     editPrefix : TEdit;
     editName : TEdit;
     rgScope : TRadioGroup;
+    procedure btnAutoClick(Sender : TObject);
+    procedure btnCancelPrefixClick(Sender : TObject);
+    procedure btnDeleteClick(Sender : TObject);
     procedure btnEditClick(Sender : TObject);
+    procedure btnSaveClick(Sender : TObject);
+    procedure cbxClassChange(Sender : TObject);
     procedure FormCreate(Sender : TObject);
   private
     fldSysPrefs : TStrings;
@@ -40,7 +46,9 @@ type
     OldCaption : String;
     procedure ParseName;
     procedure FindPrefix;
+    function classPrefix (const cls : String) : String;
     class function Execute (cmp : TComponent) : Boolean;
+    class function Generate (const cls : String) : String;
   end;
 
 type
@@ -67,7 +75,54 @@ const
 
 procedure TfrmNameEdit.btnEditClick(Sender : TObject);
  begin
+  fillClasses;
+  editPrefixMode;
+ end;
 
+procedure TfrmNameEdit.btnSaveClick(Sender : TObject);
+ begin
+  if rgScope.ItemIndex = 0
+     then begin
+           fldUsrPrefs.Values[cbxClass.Text] := editPrefix.Text;
+           fldUsrPrefs.SaveToFile(UsrPrefsFile);
+          end
+     else begin
+           fldPrjPrefs.Values[cbxClass.Text] := editPrefix.Text;
+           fldPrjPrefs.SaveToFile(PrjPrefsFile);
+          end;
+ end;
+
+procedure TfrmNameEdit.cbxClassChange(Sender : TObject);
+ begin
+  editPrefix.Text := classPrefix(cbxClass.Text);
+ end;
+
+procedure TfrmNameEdit.btnAutoClick(Sender : TObject);
+ begin
+  editPrefix.Text := Generate(cbxClass.Text);
+ end;
+
+procedure TfrmNameEdit.btnCancelPrefixClick(Sender : TObject);
+ begin
+  editNameMode;
+ end;
+
+procedure TfrmNameEdit.btnDeleteClick(Sender : TObject);
+ var
+   i : Integer;
+ begin
+  i := fldPrjPrefs.IndexOfName(cbxClass.Text);
+  if i <> -1
+     then begin
+           fldPrjPrefs.Delete(i);
+           fldPrjPrefs.SaveToFile(PrjPrefsFile);
+          end;
+  i := fldUsrPrefs.IndexOfName(cbxClass.Text);
+  if i <> -1
+     then begin
+           fldUsrPrefs.Delete(i);
+           fldUsrPrefs.SaveToFile(UsrPrefsFile);
+          end;
  end;
 
 procedure TfrmNameEdit.FormCreate(Sender : TObject);
@@ -104,6 +159,7 @@ procedure TfrmNameEdit.editNameMode;
   btnCancelPrefix.Visible := false;
   cbxClass.Visible := false;
   btnDelete.Visible := false;
+  btnAuto.Visible := false;
   rgScope.Visible := false;
  end;
 
@@ -119,6 +175,7 @@ procedure TfrmNameEdit.editPrefixMode;
   cbxClass.Visible := true;
   cbxClass.ItemIndex := 0;
   btnDelete.Visible := true;
+  btnAuto.Visible := true;
   rgScope.Visible := true;
  end;
 
@@ -171,19 +228,7 @@ procedure TfrmNameEdit.FindPrefix;
  begin
   cls := Edited.ClassType;
   repeat
-    pfx := fldPrjPrefs.Values[cls.ClassName];
-    if pfx <> ''
-       then begin
-             editPrefix.Text := pfx;
-             Exit;
-            end;
-    pfx := fldUsrPrefs.Values[cls.ClassName];
-    if pfx <> ''
-       then begin
-             editPrefix.Text := pfx;
-             Exit;
-            end;
-    pfx := fldSysPrefs.Values[cls.ClassName];
+    pfx := classPrefix(cls.ClassName);
     if pfx <> ''
        then begin
              editPrefix.Text := pfx;
@@ -192,6 +237,15 @@ procedure TfrmNameEdit.FindPrefix;
     cls := cls.ClassParent;
   until (cls = TComponent) or (cls = TObject);
   editPrefix.Text := 'cmp';
+ end;
+
+function TfrmNameEdit.classPrefix(const cls : String) : String;
+ begin
+  result := fldPrjPrefs.Values[cls];
+  if result = ''
+     then result := fldUsrPrefs.Values[cls];
+  if result = ''
+     then result := fldSysPrefs.Values[cls];
  end;
 
 var
@@ -212,6 +266,86 @@ class function TfrmNameEdit.Execute(cmp : TComponent) : Boolean;
            result := true;
           end
      else result := false;
+ end;
+
+class function TfrmNameEdit.Generate(const cls : String) : String;
+
+ var
+   nm : String;
+
+ function checkShort (out px : String) : Boolean;
+  begin
+   if Length(nm) <= 4
+      then begin
+            px := LowerCase(nm);
+            result := true;
+           end
+      else result := false;
+  end;
+
+ function checkAbbr (out px : String) : Boolean;
+  var
+    a : String;
+    i : Integer;
+  begin
+   a := '';
+   for i := 0 to Length(nm) do
+       if nm[i] in ['A'..'Z', '0'..'9']
+          then a := a + nm[i];
+   if Length(a) >= 2
+      then begin
+            px := LowerCase(a);
+            result := true;
+           end
+      else result := false;
+  end;
+
+ function vowel : String;
+  var
+    i : Integer;
+    a : String;
+  begin
+   a := '';
+   i := 1;
+   while UpCase(nm[i]) in ['A', 'E', 'I', 'O', 'U', 'Y'] do
+         begin
+          a := a + nm[i];
+          i := i + 1;
+         end;
+   if Length(a) >= 3
+      then begin
+            result := LowerCase(a);
+            Exit;
+           end;
+   while not (UpCase(nm[i]) in ['A', 'E', 'I', 'O', 'U', 'Y']) do
+         begin
+          a := a + nm[i];
+          i := i + 1;
+         end;
+   result := LowerCase(a);
+  end;
+
+ function consonant : String;
+  var
+    i : Integer;
+    a : String;
+  begin
+   a := nm[1];
+   for i := 2 to Length(nm) do
+       if (nm[i] <> nm[i - 1]) and not (UpCase(nm[i]) in ['A', 'E', 'I', 'O', 'U', 'Y'])
+          then a := a + nm[i];
+   result := LowerCase(Copy(a, 1, 3));
+  end;
+
+ begin
+  if cls[1] = 'T'
+     then nm := Copy(cls, 2, Length(cls) - 1)
+     else nm := cls;
+  if checkShort(result) or checkAbbr(result)
+     then Exit;
+  if UpCase(nm[1]) in ['A', 'E', 'I', 'O', 'U', 'Y']
+     then result := vowel
+     else result := consonant
  end;
 
 { TNameEdit }
